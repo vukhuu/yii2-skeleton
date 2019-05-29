@@ -1,0 +1,3 @@
+#!/bin/sh
+DIR=`php -r "echo dirname(realpath('$0'));"`
+php $DIR/pre-commit.php

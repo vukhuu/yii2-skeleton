@@ -1,0 +1,60 @@
+IndexIgnore *
+Options +followSymlinks
+
+<ifModule mod_rewrite.c>
+
+    RewriteEngine on
+	RewriteCond %{HTTP_USER_AGENT} libwww-perl.* 
+	RewriteRule .* ? [F,L]
+	
+	# disable Apache HTTP OPTIONS Method
+	RewriteCond %{REQUEST_METHOD} !^(GET|POST|HEAD)
+	RewriteRule .* - [R=405,L] 
+	
+	### never deliver .git folders, .gitIgnore
+	RewriteRule ^(.*/)?\.git+ - [F,L]
+
+	### never deliver .yii1 folders 
+	RewriteRule ^(.*/)?\.yii1+ - [F,L]
+
+	### never deliver composer.json
+	RewriteRule composer.json+ - [F,L]
+	### never deliver composer.phar
+	RewriteRule composer.phar+ - [F,L]
+
+	# 2nd line of defense (if no mod_rewrite)
+	RedirectMatch 403 ^(.*/)?\.git+
+	
+	ErrorDocument 403 "Access Forbidden"
+	
+    # if a directory or a file exists, use it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d 
+
+    # otherwise forward it to index.php
+    RewriteRule ^(.*)$ index.php
+
+</ifModule> 
+
+<IfModule mod_expires.c>
+    ExpiresActive on
+ 
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+</IfModule>
+
+# 2nd line of defense (if no mod_rewrite)
+RedirectMatch 403 ^(.*/)?\.git+
+RedirectMatch 403 ^(.*/)?\yii1+
+RedirectMatch 403 composer.json+
+RedirectMatch 403 composer.phar+
+ErrorDocument 403 "Access Forbidden"
+
+php_value post_max_size 50M
+php_value upload_max_filesize 50M
+
+Options -Indexes
+
+
